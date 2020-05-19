@@ -1,6 +1,6 @@
 {
   "name": "crud-helper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This is a CRUD Helper module for expressjs apps used with mongoose",
   "main": "crud.js",
   "scripts": {
