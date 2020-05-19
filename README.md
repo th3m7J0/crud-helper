@@ -55,7 +55,7 @@ This module supports several **crud functions** as follows :
 - update(resourceModel,filter,data[,middleware])
 - delete(resourceModel,filter[,middleware])
 
-2. CRUD byId :
+2. CRUD ById :
 
 - getById(resourceModel[,projection,middleware])
 - updateById(resourceModel,data[,middleware])
@@ -76,4 +76,6 @@ This module supports several **crud functions** as follows :
     return data;
 } 
 ```
-- middlware : boolean (true,false) if middlware is true then the **crud function** will act as a middleware
+- filter : filter object just like mongoose, (eg. {name:'th3m7j0'} filter by name)  
+- projection : projection object just like mongoose , (eg. {name:1,_id:0} show only the name attribut) [optional]
+- middlware : boolean (true,false) if middlware is true then the **crud function** will act as a middleware [optional]
