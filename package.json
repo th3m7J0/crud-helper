@@ -1,0 +1,24 @@
+{
+  "name": "crud-helper",
+  "version": "1.0.0",
+  "description": "This is a CRUD Helper module for expressjs apps used with mongoose",
+  "main": "crud.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/th3m7J0/crud-helper.git"
+  },
+  "keywords": [
+    "CRUD",
+    "mongoose",
+    "expressjs"
+  ],
+  "author": "MECHEREF Adel Youcef",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/th3m7J0/crud-helper/issues"
+  },
+  "homepage": "https://github.com/th3m7J0/crud-helper#readme"
+}
