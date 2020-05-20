@@ -43,6 +43,9 @@ router.route('/:id')
     .delete(
             crudHelper.deleteById(pandaModel)
     )
+
+
+module.exports = router;
 ```
 
 
@@ -79,3 +82,7 @@ This module supports several **crud functions** as follows :
 - filter : filter object just like mongoose, (eg. {name:'th3m7j0'} filter by name)  
 - projection : projection object just like mongoose , (eg. {name:1,_id:0} show only the name attribut) [optional]
 - middlware : boolean (true,false) if middlware is true then the **crud function** will act as a middleware [optional]
+
+## Project example 
+
+check this example api : [panda api](https://github.com/th3m7J0/express-panda-api)
