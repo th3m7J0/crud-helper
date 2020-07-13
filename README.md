@@ -24,24 +24,33 @@ router.route('/pandas')
     )
     // get all pandas
     .get(
-            crudHelper.getByMany(pandaModel)
+           crudHelper.get(pandaModel,'find',(req)=>{
+                   return {};
+           })
     )
 
 router.route('/:id')
     // get panda by id
     .get(
-            crudHelper.getById(pandaModel)
+            crudHelper.get(pandaModel,'findOne',(req)=>{
+                    return {_id: req.params.id};
+            })
     )
     // put panda by id
     .put(
-            crudHelper.updateById(pandaModel,(req)=>{
-                const {name,skill} = req.body;
-                return {name:name,skill:skill};
+            crudHelper.update(pandaModel,'findOneAndUpdate',(req)=>{
+                    return {_id: req.params.id};
+                },(req)=>{
+                    const {name,skill} = req.body;
+                    const myBody = {name:name,skill:skill};
+                    return extra.flexible(myBody);
             })
     )
     //delete panda by id
     .delete(
-            crudHelper.deleteById(pandaModel)
+            crudHelper.delete(pandaModel,'findOneAndDelete',(req)=>{
+                return {_id: req.params.id};
+            })
     )
 
 
@@ -50,38 +59,32 @@ module.exports = router;
 
 
 ## Usage
-This module supports several **crud functions** as follows :
-1. CRUD general :
 
-- create(resourceModel,data[,middleware])
-- get(resourceModel,filter[,projection,middleware])
-- update(resourceModel,filter,data[,middleware])
-- delete(resourceModel,filter[,middleware])
-
-2. CRUD ById :
-
-- getById(resourceModel[,projection,middleware])
-- updateById(resourceModel,data[,middleware])
-- deleteById(resourceModel[,middleware])
-
-3. CRUD ByMany : 
-
-- getByMany(resourceModel[,projection,middleware])
+- create(resourceModel, data[,middleware])
+- get(resourceModel, type, filter[,projection,middleware])
+- update(resourceModel,type, filter, data[,middleware])
+- delete(resourceModel, type, filter[,middleware])
 
 
 ### params description
 
 - resourceModel : mongoose schema object
-- data : callback function with `req` parameter that return the data for CREATE or UPDATE operations 
+- type : type of query (eg. find, findOne, findOneAndUpdate)
+- data : callback function with `req` parameter which return the data for CREATE or UPDATE operations 
 ```
 (req)=>{
     // ...
     return data;
 } 
 ```
-- filter : filter object just like mongoose, (eg. {name:'th3m7j0'} filter by name)  
-- projection : projection object just like mongoose , (eg. {name:1,_id:0} show only the name attribut) [optional]
-- middlware : boolean (true,false) if middlware is true then the **crud function** will act as a middleware [optional]
+- filter : callback function with `req` parameter which return filter object just like mongoose, (eg. {name:'th3m7j0'} filter by name)  
+```
+(req)=>{
+    // ...
+    return {name:'th3m7j0'};
+} 
+```
+- middleware : boolean (true,false) if middleware is true then the **crud function** will act as a middleware [optional]
 
 ## Project example 
 
