@@ -72,7 +72,7 @@ module.exports = router;
 - type : type of query (eg. find, findOne, findOneAndUpdate)
 - data : callback function with `req` parameter which return the data for CREATE or UPDATE operations 
 ```
-(req,res,next)=>{
+(req)=>{
     // ...
     return data;
 } 

@@ -5,7 +5,7 @@ module.exports = {
     // ******************************* CRUD general *******************************
     create: (resourceModel,data,middleware)=>{
         return catchAsync(async (req,res,next)=>{
-            const resource = await resourceModel.create(data(req,res,next));
+            const resource = await resourceModel.create(data(req));
             if(middleware)
                 return next();
             res.status(200).json(resource);
@@ -75,7 +75,7 @@ module.exports = {
     update: (resourceModel,type, filter, data, middleware)=>{
         return catchAsync(async (req,res,next)=>{
             const resource = await resourceModel[type](
-                filter(req),data(req,res,next));
+                filter(req),data(req));
             if(!resource)
                 return next(new AppError(404,'resource not found'));
             if(middleware)
