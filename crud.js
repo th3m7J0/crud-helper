@@ -6,8 +6,10 @@ module.exports = {
     create: (resourceModel,data,middleware)=>{
         return catchAsync(async (req,res,next)=>{
             const resource = await resourceModel.create(data(req));
-            if(middleware)
+            if(middleware){
+                req.resource = resource;
                 return next();
+            }
             res.status(200).json(resource);
         },'crud => create');
     },
@@ -67,8 +69,10 @@ module.exports = {
             if(type ==='findOne' && !resource)
                 return next(new AppError(404,'resource not found'));
 
-            if(middleware)
+            if(middleware){
+                req.resource = result;
                 return next();
+            }
             res.status(200).json(result);
         },'crud => get');
     },
@@ -78,8 +82,10 @@ module.exports = {
                 filter(req),data(req));
             if(!resource)
                 return next(new AppError(404,'resource not found'));
-            if(middleware)
+            if(middleware){
+                req.resource = resource;
                 return next();
+            }
             res.status(200).json(resource);
         },'crud => update');
     },
@@ -91,8 +97,10 @@ module.exports = {
             );
             if(!resource)
                 return next(new AppError(404,'resource not found'));
-            if(middleware)
+            if(middleware){
+                req.resource = resource;
                 return next();
+            }
             res.status(200).json(resource);
         },'crud => delete');
     },
