@@ -66,7 +66,7 @@ module.exports = {
             else
                 result = await resource;
 
-            if(type ==='findOne' && !resource)
+            if(type ==='findOne' && !result)
                 return next(new AppError(404,'resource not found'));
 
             if(middleware){
