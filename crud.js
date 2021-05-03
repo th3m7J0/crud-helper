@@ -5,7 +5,10 @@ module.exports = {
     // ******************************* CRUD general *******************************
     create: (resourceModel,data,middleware)=>{
         return catchAsync(async (req,res,next)=>{
-            const resource = await resourceModel.create(data(req));
+            let resource = (await resourceModel.create(data(req))).toObject();
+            // for soft remove
+            if(resource.deleted)
+                delete resource.deleted;
             if(middleware){
                 req.resource = resource;
                 return next();
