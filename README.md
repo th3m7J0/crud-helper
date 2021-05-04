@@ -86,6 +86,15 @@ module.exports = router;
 ```
 - middleware : boolean (true,false) if middleware is true then the **crud function** will act as a middleware [optional]
 
+### Params GET
+1. supports `display` parameter in order to get the desired fields
+2. supports `expand` parameter in order to get all the data
+3. supports `sort` parameter
+4. supports `limit` parameter
+5. supports `start` parameter
+6. supports `filter` parameter
+(eg. `/SomeEndpoint?display=attr1,attr2&expand=attr3,attr4&sort=attr5&limit=5&start=1&filter=attr:val`)
+
 ## Project example 
 
 check this example api : [panda api](https://github.com/th3m7J0/express-panda-api)
