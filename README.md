@@ -1,5 +1,5 @@
 # crud-helper
-This is a CRUD Helper module for expressjs apps used with `mongoose`
+This is a CRUD Helper module for expressjs apps used with [mongoose](https://www.npmjs.com/package/mongoose) and [Joi](https://www.npmjs.com/package/joi)
 in order to simplify the common operations
 
 ## Installation 
@@ -94,6 +94,11 @@ module.exports = router;
 5. supports `start` parameter
 6. supports `filter` parameter
 (eg. `/SomeEndpoint?display=attr1,attr2&expand=attr3,attr4&sort=attr5&limit=5&start=1&filter=attr:val`)
+
+## Input Validation
+
+- crud-helper >= 4.0.0 supports input validation with the help of [Joi](https://www.npmjs.com/package/joi).
+the validation of fields [data(req)/ filter(req)] will be done automatically using the types of mongoose schema.
 
 ## Project example 
 
