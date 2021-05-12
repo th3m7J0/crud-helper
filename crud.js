@@ -4,6 +4,7 @@ const filterValidation = require('./validations/filterValidation');
 
 module.exports = {
     // ******************************* CRUD general *******************************
+    
     create: (resourceModel,data,middleware)=>{
         return catchAsync(async (req,res,next)=>{
             // input validation
