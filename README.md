@@ -6,6 +6,46 @@ in order to simplify the common operations
 
 `$ npm install crud-helper --save`
 
+## requirements
+- This module supports `mongoDB` database only for now.
+- This module supports soft remove only for now.
+- You need to add this snippet of code after schema definition for (search and soft remove): 
+```
+// index all string attributes for search
+mySchema.index({'$**': 'text'});
+
+//*********  for soft remove ********* 
+mySchema.pre('aggregate', function () {
+    if(this._pipeline[0]['$match'].deleted === undefined)
+        this._pipeline[0]['$match'].deleted = {_state: false};
+});
+
+mySchema.pre('countDocuments', function () {
+    if(this._conditions.deleted === undefined)
+        this.where({deleted: {_state: false}});
+});
+
+mySchema.pre('find', function () {
+    if(this._conditions.deleted === undefined)
+        this.where({deleted: {_state: false}});
+});
+
+mySchema.pre('findOne', function () {
+    if(this._conditions.deleted === undefined)
+        this.where({deleted: {_state: false}});
+});
+
+mySchema.pre('findOneAndUpdate', function () {
+    if(this._conditions.deleted === undefined)
+        this.where({deleted: {_state: false}});
+    this.options.new = true;
+    this.options.runValidators = true;
+
+});
+// ********************************
+```
+for more details check the [panda api](https://github.com/th3m7J0/express-panda-api) example.
+
 ## Examples
 ```
 const express = require('express');
