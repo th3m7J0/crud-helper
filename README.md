@@ -93,7 +93,18 @@ module.exports = router;
 4. supports `limit` parameter
 5. supports `start` parameter
 6. supports `filter` parameter
-(eg. `/SomeEndpoint?display=attr1,attr2&expand=attr3,attr4&sort=attr5&limit=5&start=1&filter=attr:val`)
+    - supports several operations: `['equals','gt','lt','gte','lte','regex','ne','or']`
+    - the delimiter between the attribute and the operation is `__`
+    - the delimiter between the attribute and the value is `::`
+    - usage:  `filter=attribute__operation::value` by default `operation=equals`
+7. supports `page` (the number of the page) parameter used with `limit`
+8. supports `search` parameter, works with mongoDB text index search.
+9. supports `count` parameter
+
+(eg. `/SomeEndpoint?display=attr1,attr2&expand=attr3,attr4&sort=attr5&limit=5&start=1&filter=attr::val`)
+(eg. `/SomeEndpoint?count=1`)
+(eg. `/SomeEndpoint?count=1&filter=attr::val`)
+(eg. `/SomeEndpoint?search=val`)
 
 ## Input Validation
 

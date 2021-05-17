@@ -23,13 +23,17 @@ module.exports = {
             res.status(200).json(resource);
         },'crud => create');
     },
+
     get: (resourceModel, type, _filter, middleware)=> {
         return catchAsync(async (req,res,next)=>{
+            let nbPages = 0;
+            let _count = 0;
             let sortObject = {};
             let projection = {};
             let result = {};
-            let {display,expand,limit,sort,start,filter} = req.query;
-            // 1. support projection in order to get the desired fields
+            let {display,expand,limit,sort,start,filter,page,count,search} = req.query;
+
+            // support projection in order to get the desired fields
             if (display){
                 let elements = display.split(',');
                 elements.forEach(element=>{
@@ -39,15 +43,21 @@ module.exports = {
 
             // filter input validation
             let myFilter = await filterValidation(resourceModel,_filter(req),next);
+
             if(!myFilter)
                 return;
+
+            // support search parameter
+            if(search && type === 'find'){
+                myFilter['$text']= {$search: search,$diacriticSensitive:true,$language: 'none'};
+            }
 
             let resource = projection?  resourceModel[type](myFilter,projection):
                 resourceModel[type](myFilter);
 
             if(type === 'find') {
 
-                // 2. support sort parameter
+                // support sort parameter
                 if (sort) {
                     let elements = sort.split(',');
                     elements.forEach(element => {
@@ -55,34 +65,71 @@ module.exports = {
                     })
                     resource.sort(sortObject);
                 }
-                // 3. support limit parameter
+
+                // support limit parameter
                 if (limit) {
                     resource.limit(parseInt(limit));
                 }
-                // 4. support start parameter
+
+                // support start parameter
                 if (start) {
                     resource.skip(parseInt(start));
                 }
-                // 6. support filter
+
+                // support filter
                 if (filter) {
-                    let elements = filter.split(',');
+                    let elemDelimiter = ',';
+                    let elements = filter.split(elemDelimiter);
+                    // allowed operations
+                    let operations = ['equals','gt','lt','gte','lte','regex','ne','or'];
+                    let orElements = [];
                     elements.forEach(element=>{
-                        let attribute = element.split(':')[0];
-                        let value = element.split(':')[1];
-                        resource.where(attribute).equals(value);
-                    })
+                        let opDelimiter = '__';
+                        let valueDelimiter = '::';
+
+                        let attributeWithOp = element.split(valueDelimiter)[0];
+
+                        let attribute = attributeWithOp.split(opDelimiter)[0];
+                        let operation = operations.includes(attributeWithOp.split(opDelimiter)[1])?attributeWithOp.split(opDelimiter)[1]:'equals';
+                        let value = element.split(valueDelimiter)[1];
+
+                        // add or elements
+                        if(operation === 'or'){
+                             orElements.push({[attribute]:value});
+                        } else
+                            resource.where(attribute)[operation](value);
+                    });
+                    if(orElements.length>0){
+                        resource.where({'$or':orElements});
+                    }
+                }
+
+                // support pagination, give it number of page and how much docs to limit
+                if (page) {
+                    if(page<1)
+                        return next(new AppError(409,'page is out of range'));
+                    resource.skip((parseInt(page) - 1) * parseInt(limit));
+                    let c = await resourceModel.countDocuments(myFilter);
+                    nbPages = parseInt(c) % parseInt(limit) === 0 ? Math.trunc(parseInt(c)/parseInt(limit)) : Math.trunc(parseInt(c)/parseInt(limit))+1;
                 }
             }
 
-            // 5. support populate in order to get all the data
+            // support populate in order to get all the data
             if(expand){
                 let elements = expand.split(',');
                 elements.forEach(element=>{
                     resource.populate({path:element,match:{'deleted._state':false}})
                 })
             }
+
             // final result
-            result = await resource;
+            if(type === 'find' && page)
+                result = {resource:await resource,nbPages: nbPages};
+             // support count parameter
+            else if (count === '1')
+                result = (await resource).length;
+            else
+                result = await resource;
 
             if(type ==='findOne' && !result)
                 return next(new AppError(404,'resource not found'));
