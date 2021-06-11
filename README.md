@@ -128,7 +128,7 @@ module.exports = router;
 
 ### Params GET
 1. supports `display` parameter in order to get the desired fields
-2. supports `expand` parameter in order to get all the data
+2. supports `expand` parameter in order to get all the data, the expansion of nested fields is done using `..` (eg. `user..photo` this will expand the user and his photo)
 3. supports `sort` parameter
 4. supports `limit` parameter
 5. supports `start` parameter

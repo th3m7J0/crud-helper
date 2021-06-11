@@ -117,9 +117,30 @@ module.exports = {
             // support populate in order to get all the data
             if(expand){
                 let elements = expand.split(',');
-                elements.forEach(element=>{
-                    resource.populate({path:element,match:{'deleted._state':false}})
-                })
+                for (let i = 0; i < elements.length; i++) {
+                    let components = elements[i].split('..');
+
+                    if(components.length > 3){
+                        return next(new AppError(409,'max 3 nested docs'));
+                    }
+                    let populateObject = {};
+                    for (let i = 0; i < components.length; i++) {
+                        let obj = {};
+                        obj['path'] = components[i];
+                        obj['match'] =  {'deleted._state':false};
+                        switch (i){
+                        case 0: populateObject = obj;
+                            break;
+                        case 1: populateObject['populate'] = obj;
+                            break;
+                        case 2: populateObject['populate']['populate'] = obj;
+                            break;
+                        }
+                    }
+
+                    console.log(populateObject);
+                    resource.populate(populateObject)
+                }
             }
 
             // final result
