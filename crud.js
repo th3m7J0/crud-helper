@@ -138,7 +138,6 @@ module.exports = {
                         }
                     }
 
-                    console.log(populateObject);
                     resource.populate(populateObject)
                 }
             }
