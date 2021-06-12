@@ -41,11 +41,9 @@ module.exports = {
                 })
             }
 
-            // filter input validation
-            let myFilter = await filterValidation(resourceModel,_filter(req),next);
+            // filters from controller
+            let myFilter = _filter(req);
 
-            if(!myFilter)
-                return;
 
             // support search parameter
             if(search && type === 'find'){
@@ -167,10 +165,8 @@ module.exports = {
             let myBody = await bodyValidation(resourceModel,data(req),next);
             if(!myBody)
                 return;
-            // filter input validation
-            let myFilter = await filterValidation(resourceModel,filter(req),next);
-            if(!myFilter)
-                return;
+            // filters from controller
+            let myFilter = filter(req);
 
             const resource = await resourceModel[type](
                 myFilter,myBody);
@@ -185,10 +181,8 @@ module.exports = {
     },
     delete:(resourceModel, type, filter, middleware)=>{
         return catchAsync(async (req,res,next)=>{
-            // filter input validation
-            let myFilter = await filterValidation(resourceModel,filter(req),next);
-            if(!myFilter)
-                return;
+            // filters from controller
+            let myFilter = filter(req);
 
             const resource =  await resourceModel[type](
                 myFilter,
