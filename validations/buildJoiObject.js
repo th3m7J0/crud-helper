@@ -21,7 +21,7 @@ module.exports = function buildJoiObject(attributes){
 		},
 		{
 			type: 'Date',
-			value: Joi.date().iso().required(), // date
+			value: Joi.date().iso().allow(null), // date
 		}
 	]
 	let joiObject= {};
