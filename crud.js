@@ -2,6 +2,34 @@ const {catchAsync,AppError} = require('./error');
 const bodyValidation = require('./validations/bodyValidation');
 const filterValidation = require('./validations/filterValidation');
 
+const doExpand = async (expand,resource)=>{
+    if(expand){
+        let elements = expand.split(',');
+        for (let i = 0; i < elements.length; i++) {
+            let components = elements[i].split('..');
+
+            if(components.length > 3){
+                return next(new AppError(409,'max 3 nested docs'));
+            }
+            let populateObject = {};
+            for (let i = 0; i < components.length; i++) {
+                let obj = {};
+                obj['path'] = components[i];
+                obj['match'] =  {'deleted._state':false};
+                switch (i){
+                case 0: populateObject = obj;
+                    break;
+                case 1: populateObject['populate'] = obj;
+                    break;
+                case 2: populateObject['populate']['populate'] = obj;
+                    break;
+                }
+            }
+            await resource.populate(populateObject).execPopulate();
+        }
+    }
+};
+
 module.exports = {
     // ******************************* CRUD general *******************************
     
@@ -18,31 +46,7 @@ module.exports = {
             let resource = await resourceModel.create(myBody);
 
             // support populate in order to get all the data
-            if(expand){
-                let elements = expand.split(',');
-                for (let i = 0; i < elements.length; i++) {
-                    let components = elements[i].split('..');
-
-                    if(components.length > 3){
-                        return next(new AppError(409,'max 3 nested docs'));
-                    }
-                    let populateObject = {};
-                    for (let i = 0; i < components.length; i++) {
-                        let obj = {};
-                        obj['path'] = components[i];
-                        obj['match'] =  {'deleted._state':false};
-                        switch (i){
-                        case 0: populateObject = obj;
-                            break;
-                        case 1: populateObject['populate'] = obj;
-                            break;
-                        case 2: populateObject['populate']['populate'] = obj;
-                            break;
-                        }
-                    }
-                    await resource.populate(populateObject).execPopulate();
-                }
-            }
+            await doExpand(expand,resource);
 
             // make it editable
             resource = resource.toObject();
@@ -146,42 +150,18 @@ module.exports = {
                 }
             }
 
+            resource = await  resource;
             // support populate in order to get all the data
-            if(expand){
-                let elements = expand.split(',');
-                for (let i = 0; i < elements.length; i++) {
-                    let components = elements[i].split('..');
-
-                    if(components.length > 3){
-                        return next(new AppError(409,'max 3 nested docs'));
-                    }
-                    let populateObject = {};
-                    for (let i = 0; i < components.length; i++) {
-                        let obj = {};
-                        obj['path'] = components[i];
-                        obj['match'] =  {'deleted._state':false};
-                        switch (i){
-                        case 0: populateObject = obj;
-                            break;
-                        case 1: populateObject['populate'] = obj;
-                            break;
-                        case 2: populateObject['populate']['populate'] = obj;
-                            break;
-                        }
-                    }
-
-                    resource.populate(populateObject)
-                }
-            }
+            await doExpand(expand,resource);
 
             // final result
             if(type === 'find' && page)
-                result = {resource:await resource,nbPages: nbPages};
+                result = {resource: resource,nbPages: nbPages};
              // support count parameter
             else if (count === '1')
-                result = (await resource).length;
+                result = resource.length;
             else
-                result = await resource;
+                result = resource;
 
             if(type ==='findOne' && !result)
                 return next(new AppError(404,'resource not found'));
@@ -195,6 +175,8 @@ module.exports = {
     },
     update: (resourceModel,type, filter, data, middleware)=>{
         return catchAsync(async (req,res,next)=>{
+            let {expand} = req.query;
+
             // body input validation
             let myBody = await bodyValidation(resourceModel,data(req),next);
             if(!myBody)
@@ -202,10 +184,14 @@ module.exports = {
             // filters from controller
             let myFilter = filter(req);
 
-            const resource = await resourceModel[type](
+            let resource = await resourceModel[type](
                 myFilter,myBody);
             if(!resource)
                 return next(new AppError(404,'resource not found'));
+
+            // support populate in order to get all the data
+            await doExpand(expand,resource);
+
             if(middleware){
                 req.resource = resource;
                 return next();
