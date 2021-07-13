@@ -147,6 +147,9 @@ module.exports = router;
 (eg. `/SomeEndpoint?count=1&filter=attr::val`)
 (eg. `/SomeEndpoint?search=val`)
 
+### Params POST
+1. supports `expand` parameter in order to get all the data, the expansion of nested fields is done using `..` (eg. `user..photo` this will expand the user and his photo)
+
 ## Input Validation
 
 - crud-helper >= 4.0.0 supports input validation with the help of [Joi](https://www.npmjs.com/package/joi).

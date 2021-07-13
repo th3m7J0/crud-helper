@@ -7,12 +7,46 @@ module.exports = {
     
     create: (resourceModel,data,middleware)=>{
         return catchAsync(async (req,res,next)=>{
+
+            let {expand} = req.query;
+
             // input validation
             let myBody = await bodyValidation(resourceModel,data(req),next);
             if(!myBody)
                 return;
 
-            let resource = (await resourceModel.create(myBody)).toObject();
+            let resource = await resourceModel.create(myBody);
+
+            // support populate in order to get all the data
+            if(expand){
+                let elements = expand.split(',');
+                for (let i = 0; i < elements.length; i++) {
+                    let components = elements[i].split('..');
+
+                    if(components.length > 3){
+                        return next(new AppError(409,'max 3 nested docs'));
+                    }
+                    let populateObject = {};
+                    for (let i = 0; i < components.length; i++) {
+                        let obj = {};
+                        obj['path'] = components[i];
+                        obj['match'] =  {'deleted._state':false};
+                        switch (i){
+                        case 0: populateObject = obj;
+                            break;
+                        case 1: populateObject['populate'] = obj;
+                            break;
+                        case 2: populateObject['populate']['populate'] = obj;
+                            break;
+                        }
+                    }
+                    await resource.populate(populateObject).execPopulate();
+                }
+            }
+
+            // make it editable
+            resource = resource.toObject();
+
             // for soft remove
             if(resource.deleted)
                 delete resource.deleted;
