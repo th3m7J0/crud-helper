@@ -30,6 +30,34 @@ const doExpand = async (expand,resource)=>{
     }
 };
 
+const doExpandGet = (expand,resource)=>{
+    if(expand){
+        let elements = expand.split(',');
+        for (let i = 0; i < elements.length; i++) {
+            let components = elements[i].split('..');
+
+            if(components.length > 3){
+                return next(new AppError(409,'max 3 nested docs'));
+            }
+            let populateObject = {};
+            for (let i = 0; i < components.length; i++) {
+                let obj = {};
+                obj['path'] = components[i];
+                obj['match'] =  {'deleted._state':false};
+                switch (i){
+                case 0: populateObject = obj;
+                    break;
+                case 1: populateObject['populate'] = obj;
+                    break;
+                case 2: populateObject['populate']['populate'] = obj;
+                    break;
+                }
+            }
+            resource.populate(populateObject);
+        }
+    }
+};
+
 module.exports = {
     // ******************************* CRUD general *******************************
     
@@ -150,9 +178,10 @@ module.exports = {
                 }
             }
 
-            resource = await  resource;
             // support populate in order to get all the data
-            await doExpand(expand,resource);
+            doExpandGet(expand,resource);
+
+            resource = await  resource;
 
             // final result
             if(type === 'find' && page)
