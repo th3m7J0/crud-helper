@@ -17,7 +17,7 @@ module.exports = function buildJoiObject(attributes){
 		},
 		{
 			type: 'Boolean',
-			value: Joi.boolean().default(false),
+			value: Joi.boolean().allow(null),
 		},
 		{
 			type: 'Date',
