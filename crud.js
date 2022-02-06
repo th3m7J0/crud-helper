@@ -32,7 +32,7 @@ const doExpand = async (expand,resource)=>{
 
 const doExpandGet = (expand,resource)=>{
     if(expand){
-        let elements = expand.split(',');
+        let elements = expand.split(';')[0].split(',');
         for (let i = 0; i < elements.length; i++) {
             let components = elements[i].split('..');
 
@@ -140,6 +140,7 @@ module.exports = {
                     resource.skip(parseInt(start));
                 }
 
+
                 // support filter
                 if (filter) {
                     let elemDelimiter = ',';
@@ -181,7 +182,29 @@ module.exports = {
             // support populate in order to get all the data
             doExpandGet(expand,resource);
 
+
             resource = await  resource;
+
+            // filter in expand attributes with only one attribute and equal operation
+
+            // get the filter for populated attributes with ; delimiter
+            if(expand){
+                let matches = expand.split(';').length>1 ? expand.split(';')[1]:'';
+                if(matches.length>0){
+                    let elemDelimiter = ',';
+                    let elements = matches.split(elemDelimiter);
+
+                    elements.forEach(element=>{
+                        let valueDelimiter = '::';
+                        let attribute = element.split(valueDelimiter)[0];
+                        let expanded = attribute.split('.')[0];
+                        let attributeOfexpanded = attribute.split('.')[1];
+                        let value = element.split(valueDelimiter)[1];
+                        resource = resource.filter(res=> res[expanded][attributeOfexpanded].toString() === value);
+                    });
+                }
+            }
+
 
             // final result
             if(type === 'find' && page)
